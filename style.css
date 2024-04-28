@@ -40,24 +40,20 @@ body * {
     background-color: rgba(255, 255, 240, 0.7);
 } 
 
-.stTitle{
-    font-size: larger;
-    background-color: rgba(255, 255, 240, 0.7); /* Slightly more transparent than body */
+
+.stRadio, h1, a, .stTextInput, .stMultiSelect{
+    background-color: rgba(255, 255, 240, 0.7); 
     padding: 8px; 
     border-radius: 4px; 
-}
+} 
 
-.stRadio, h1, a, .stTextInput{
-    background-color: rgba(255, 255, 240, 0.7); /* Slightly more transparent than body */
-    padding: 8px; 
-    border-radius: 4px; 
-}
 
-.reportview-container {
-    background-image: url('https://www.illustratedmonthly.com/cdn/shop/products/manuscript-ornaments-tattoo-art-reference-17844050821282_2000x.jpg?v=1594215803');
-}
 .sidebar .sidebar-content {
     background-color: darkgray;
+}
+
+.stTitle {
+    font-size: larger ;
 }
 
 
