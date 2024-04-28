@@ -3,9 +3,10 @@ import streamlit as st
 from tarot_deck import TarotDeck
 from openai import OpenAI
 from dotenv import load_dotenv
+import time
+from PIL import Image
 
 load_dotenv()
-
 
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
@@ -22,17 +23,42 @@ def main():
 
     if mode == 'Classic':
         user_question = st.text_input("Enter your question:")
-        if st.button("Get Tarot Reading"):
+        if user_question:
+            tarot_deck = TarotDeck()
             tarot_deck.shuffle_cards()
-            drawn_cards = tarot_deck.draw_cards()
-            reading = get_tarot_reading_v1(user_question, drawn_cards)
-            st.write("Your Tarot Reading:")
-            st.write(reading)
+
+            st.button("Shuffle Cards")
+
+            # Simulate card shuffling animation
+            if st.button("Stop Shuffling"):
+                pass
+
+            selected_indices = st.multiselect("Choose your cards:", options=range(78), format_func=lambda x: "Card " + str(x+1))
+
+
+            if len(selected_indices) == 3:
+                drawn_cards = [tarot_deck.shuffled_deck[i] for i in selected_indices]
+                images = []
+                captions = []
+                for card in drawn_cards:
+                    image_path = os.path.join( card[2])
+                    img = Image.open(image_path)
+                    if card[1] == 'downward':
+                        img = img.rotate(180)
+                    images.append(img)
+                    captions.append(card[0])
+
+                st.image(images, width=200, caption=captions)
+
+                # Call reading function
+                reading = get_tarot_reading_v1(user_question, drawn_cards)
+                st.write("Your Tarot Reading:")
+                st.write(reading)
 
     elif mode == 'Fun':
         if 'stage' not in st.session_state:
             st.session_state['stage'] = 'keyword_input'
-        
+
         if st.session_state['stage'] == 'keyword_input':
             keyword = st.text_input("Type a keyword:")
             if st.button("Submit"):
@@ -51,7 +77,7 @@ def main():
                 chosen_set = option.split('. ')[1]  # Removes the numbering like "1. "
                 st.session_state['chosen_set'] = chosen_set
                 st.session_state['stage'] = 'final_question'
-        
+
         if st.session_state['stage'] == 'final_question':
             user_question = st.text_input("Now, type your question:")
             if st.button("Get Tarot Reading"):
@@ -71,11 +97,18 @@ def get_tarot_reading_v1(user_question,drawn_cards):
         model="gpt-3.5-turbo-0125",
         #response_format={ "type": "json_object" },
         messages=[
-            {"role": "system", "content": "You are a tarot reader. Please interpret the cards drawn for the user."},
+            {"role": "system", "content": "You are a tarot reader. Please interpret the cards drawn for the user. 1. Provide the card info and the upward or downward status of each card. 2. Give an explaination of each individual card, and then a overall analysis based on these three cards."},
             {"role": "user", "content": prompt}
         ]
     )
     return response.choices[0].message.content
+
+def load_and_rotate_image(image_path, orientation):
+    img = Image.open(image_path)
+    if orientation == 'downward':
+        img = img.rotate(180)  # Rotate the image by 180 degrees
+    return img
+
 
 class FunMode:
     def generate_object_sets(keyword):
@@ -133,7 +166,7 @@ class FunMode:
             ]
         )
         return response.choices[0].message.content
-      
+
 
 
 
