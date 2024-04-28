@@ -3,10 +3,16 @@ import streamlit as st
 from tarot_deck import TarotDeck
 from openai import OpenAI
 from dotenv import load_dotenv
+
+import base64
 import time
 from PIL import Image
 
 load_dotenv()
+
+
+with open( "style.css" ) as css:
+    st.markdown( f'<style>{css.read()}</style>' , unsafe_allow_html= True)
 
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
@@ -27,33 +33,66 @@ def main():
             tarot_deck = TarotDeck()
             tarot_deck.shuffle_cards()
 
-            st.button("Shuffle Cards")
+            # st.button("Shuffle Cards")
 
-            # Simulate card shuffling animation
-            if st.button("Stop Shuffling"):
-                pass
+            # # Simulate card shuffling animation
+            # if st.button("Stop Shuffling"):
+            #     pass
 
+            col1, col2 = st.columns(2)
+            with col1:
+                if st.button("Shuffle Cards"):
+                    st.session_state['shuffling'] = True
+            
+            with col2:
+                if st.session_state.get('shuffling', False):
+                    if st.button("Stop Shuffling"):
+                        st.session_state['shuffling'] = False
+
+            if st.session_state.get('shuffling', False):
+                st.write("Card shuffling...")
+
+            # selected_indices = st.multiselect("Choose your cards:", options=range(78), format_func=lambda x: "Card " + str(x+1))
+
+
+            # if len(selected_indices) == 3:
+            #     drawn_cards = [tarot_deck.shuffled_deck[i] for i in selected_indices]
+            #     images = []
+            #     captions = []
+            #     for card in drawn_cards:
+            #         image_path = os.path.join( card[2])
+            #         img = Image.open(image_path)
+            #         if card[1] == 'downward':
+            #             img = img.rotate(180)
+            #         images.append(img)
+            #         captions.append(card[0])
+
+            #     st.image(images, width=200, caption=captions)
+                
             selected_indices = st.multiselect("Choose your cards:", options=range(78), format_func=lambda x: "Card " + str(x+1))
-
 
             if len(selected_indices) == 3:
                 drawn_cards = [tarot_deck.shuffled_deck[i] for i in selected_indices]
                 images = []
                 captions = []
                 for card in drawn_cards:
-                    image_path = os.path.join( card[2])
+                    image_path = os.path.join(card[2])
                     img = Image.open(image_path)
                     if card[1] == 'downward':
                         img = img.rotate(180)
                     images.append(img)
-                    captions.append(card[0])
+                    captions.append(f"<span style='color:darkred;'>{card[0]}</span>")
 
-                st.image(images, width=200, caption=captions)
+                cols = st.columns(3)
+                for i, image in enumerate(images):
+                    with cols[i]:
+                        st.markdown(f"<div style='width: 210px;text-align: center;background-color:rgba(251, 248, 196,1); padding: 8px;  border-radius:4%;'>{captions[i]}</div>", unsafe_allow_html=True)
+                        st.image(image, width=210)
+
 
                 # Call reading function
                 reading = get_tarot_reading_v1(user_question, drawn_cards)
-                st.write("Your Tarot Reading:")
-                st.write(reading)
+                ReadingWrite("Your Tarot Reading:\n"+reading)
 
     elif mode == 'Fun':
         if 'stage' not in st.session_state:
@@ -74,7 +113,7 @@ def main():
             sets_list = st.session_state['obj_set'].split('\n')
             option = st.radio("Which set of objects would you like to pick?", sets_list)
             if st.button("Choose Set"):
-                chosen_set = option.split('. ')[1]  # Removes the numbering like "1. "
+                chosen_set = option.split('. ')[1]  
                 st.session_state['chosen_set'] = chosen_set
                 st.session_state['stage'] = 'final_question'
 
@@ -84,20 +123,37 @@ def main():
                 symbolism_list = FunMode.set_symbolism(st.session_state['chosen_set']).split(':')
                 keywords = symbolism_list[0]
                 st.write(symbolism_list[1])
-                st.write("Your keywords are:", keywords)
+                ReadingWrite("Your keywords are:\n"+ keywords)
                 reading = FunMode.get_tarot_reading_fun(keywords, user_question)
-                st.write("Your Tarot Reading:")
-                st.write(reading)
+                ReadingWrite("Your Tarot Reading:\n"+reading)
 
+# def get_tarot_reading_v1(user_question,drawn_cards):
+
+#     prompt = tarot_deck.generate_prompt(user_question, drawn_cards)
+
+#     response = client.chat.completions.create(
+#         model="gpt-3.5-turbo-0125",
+#         #response_format={ "type": "json_object" },
+#         messages=[
+#             {"role": "system", "content": "You are a tarot reader. Please interpret the cards drawn for the user. 1. Provide the card info and the upward or downward status of each card. 2. Give an explaination of each individual card, and then a overall analysis based on these three cards."},
+#             {"role": "user", "content": prompt}
+#         ]
+#     )
+#     return response.choices[0].message.content
+                
 def get_tarot_reading_v1(user_question,drawn_cards):
 
     prompt = tarot_deck.generate_prompt(user_question, drawn_cards)
 
     response = client.chat.completions.create(
-        model="gpt-3.5-turbo-0125",
+        model="gpt-4",
         #response_format={ "type": "json_object" },
         messages=[
-            {"role": "system", "content": "You are a tarot reader. Please interpret the cards drawn for the user. 1. Provide the card info and the upward or downward status of each card. 2. Give an explaination of each individual card, and then a overall analysis based on these three cards."},
+            {"role": "system", "content": "You are a tarot reader. Please interpret the cards drawn for the user."
+                                        + " Provide the card info and the upward or downward status of each card."
+                                        + " Give an explaination of each individual card, and then a overall analysis based on these three cards."
+                                        + " Please feel free to use the elments in the cards as sysmbols for the user's situation if necessary"
+                                        + " Your answer don't always have to be positive."},
             {"role": "user", "content": prompt}
         ]
     )
@@ -168,7 +224,10 @@ class FunMode:
         return response.choices[0].message.content
 
 
+def ReadingWrite(url):
+    #  st.markdown(f'< style="background-color:rgba(255, 255, 240, 0.7);font-size:24px;border-radius:4%;">{url}</>', unsafe_allow_html=True)
+    st.markdown(f'<div style="background-color:rgba(251, 248, 196,1); padding: 8px;  border-radius:4%;">{url}</div>', unsafe_allow_html=True)
 
-
+     
 if __name__ == "__main__":
     main()
