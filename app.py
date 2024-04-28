@@ -121,8 +121,9 @@ def main():
             user_question = st.text_input("Now, type your question:")
             if st.button("Get Tarot Reading"):
                 st.session_state['user_question'] = user_question  
-                symbolism = FunMode.set_symbolism(st.session_state['chosen_set'])
-                reading = FunMode.get_tarot_reading_fun(symbolism, st.session_state['user_question'])
+                keywords = FunMode.set_symbolism(st.session_state['chosen_set'])
+                ReadingWrite("Keywords: "+keywords)
+                reading = FunMode.get_tarot_reading_fun(keywords, st.session_state['user_question'])
                 ReadingWrite(reading)
 
 # def get_tarot_reading_v1(user_question,drawn_cards):
@@ -200,7 +201,7 @@ class FunMode:
             model="gpt-4",
             messages=[
                 {"role": "system", "content": "Give four keywords about the symbolism associated to a set of objects user chose"                                        + "Make sure to give two positive ones and two negative ones."
-                                            + "Format: keywords separated by commas:concise explanation"},
+                                            + "Format: ONLY keywords separated by commas. NO other explanation."},
                 {"role": "user", "content": "The set of object is " + chosen_set}
             ]
         )
@@ -210,12 +211,12 @@ class FunMode:
         response = client.chat.completions.create(
             model="gpt-4",
             messages=[
-                {"role": "system", "content": "You are a tarot reader. Given keywords, symbolisms and one user question, you draw out 1 card."
+                {"role": "system", "content": "You are a tarot reader. Given keywords, you draw out 1 card."
                                             + "This card should be correlated to the keywords but loosely."
                                             + "Detailed explain the face of this card. Explain each individuals and their meanings."
                                             + "Then answer user's question, with correspondence to symbolism of the card."
                                             + "The answer doesn't have to always be positive. But Always give an answer and Don't ask user for more information."
-                                            + "Format: Keywords: [content]\newline Card Name: [content]\newline Individuals and their symbolisms: [content]\newline Answer to your question: [content]"},
+                                            + "Format: Card Name: [content]\newline Individuals and their symbolisms: [content]\newline Answer to your question: [content]"},
                 {"role": "user", "content": "The keyword is " + keywords + "User question is " + user_question }
             ]
         )
