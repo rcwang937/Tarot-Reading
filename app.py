@@ -43,7 +43,7 @@ def main():
             with col1:
                 if st.button("Shuffle Cards"):
                     st.session_state['shuffling'] = True
-            
+
             with col2:
                 if st.session_state.get('shuffling', False):
                     if st.button("Stop Shuffling"):
@@ -68,7 +68,7 @@ def main():
             #         captions.append(card[0])
 
             #     st.image(images, width=200, caption=captions)
-                
+
             selected_indices = st.multiselect("Choose your cards:", options=range(78), format_func=lambda x: "Card " + str(x+1))
 
             if len(selected_indices) == 3:
@@ -113,7 +113,7 @@ def main():
             sets_list = st.session_state['obj_set'].split('\n')
             option = st.radio("Which set of objects would you like to pick?", sets_list)
             if st.button("Choose Set"):
-                chosen_set = option.split('. ')[1]  
+                chosen_set = option.split('. ')[1]
                 st.session_state['chosen_set'] = chosen_set
                 st.session_state['stage'] = 'final_question'
 
@@ -140,7 +140,7 @@ def main():
 #         ]
 #     )
 #     return response.choices[0].message.content
-                
+
 def get_tarot_reading_v1(user_question,drawn_cards):
 
     prompt = tarot_deck.generate_prompt(user_question, drawn_cards)
@@ -226,8 +226,8 @@ class FunMode:
 
 def ReadingWrite(url):
     #  st.markdown(f'< style="background-color:rgba(255, 255, 240, 0.7);font-size:24px;border-radius:4%;">{url}</>', unsafe_allow_html=True)
-    st.markdown(f'<div style="background-color:rgba(251, 248, 196,1); padding: 8px;  border-radius:4%;">{url}</div>', unsafe_allow_html=True)
+    st.markdown(f'<div style="background-color:rgba(251, 248, 196,1); padding: 20px;  border-radius:4%;">{url}</div>', unsafe_allow_html=True)
 
-     
+
 if __name__ == "__main__":
     main()

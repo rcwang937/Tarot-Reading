@@ -1,4 +1,4 @@
-/* @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@100&display=swap'); 
+/* @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@100&display=swap');
 
 body * {
     font-family: 'Roboto', sans-serif !important;
@@ -16,7 +16,7 @@ body * {
 
 [data-testid="stAppViewContainer"] {
     background-image: url('https://www.illustratedmonthly.com/cdn/shop/products/manuscript-ornaments-tattoo-art-reference-17844050821282_2000x.jpg?v=1594215803');
-    background-attachment: fixed; 
+    background-attachment: fixed;
     margin-bottom: 8px;
     box-sizing: border-box;
     background-size: cover;
@@ -37,20 +37,20 @@ body * {
     border-radius: 10px;
     background-size: cover;
     background-color: rgba(251,248,196,.9);
-} 
+}
 
 
 .stRadio, h1, a, .stTextInput, .stMultiSelect{
-    background-color: rgba(251,248,196,.9); 
-    padding: 8px; 
-    border-radius: 4px; 
-    
-} 
+    background-color: rgba(251,248,196,.9);
+    padding: 15px;
+    border-radius: 4px;
+
+}
 
 .stRadio, h1, a, p, span, div, .stTextInput{
     color: darkred;
 
-} 
+}
 
 .stTitle {
     font-size: larger ;
@@ -58,7 +58,7 @@ body * {
 
 .stImage image{
     background-color:rgba(251,248,196) ;
-    padding: 8px; 
-    border-radius: 4px; 
+    padding: 8px;
+    border-radius: 4px;
 
 }
