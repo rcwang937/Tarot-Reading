@@ -11,7 +11,6 @@ body * {
 
 body * {
     font-family: "EB Garamond", serif !important;
-    color: darkred;
 }
 
 
@@ -37,26 +36,29 @@ body * {
     cursor: pointer;
     border-radius: 10px;
     background-size: cover;
-    background-color: rgba(255, 255, 240, 0.7);
+    background-color: rgba(251,248,196,.9);
 } 
 
 
 .stRadio, h1, a, .stTextInput, .stMultiSelect{
-    background-color: rgba(255, 255, 240, 0.7); 
+    background-color: rgba(251,248,196,.9); 
     padding: 8px; 
     border-radius: 4px; 
+    
 } 
 
+.stRadio, h1, a, p, span, div, .stTextInput{
+    color: darkred;
 
-.sidebar .sidebar-content {
-    background-color: darkgray;
-}
+} 
 
 .stTitle {
     font-size: larger ;
 }
 
+.stImage image{
+    background-color:rgba(251,248,196) ;
+    padding: 8px; 
+    border-radius: 4px; 
 
-
-
-
+}
