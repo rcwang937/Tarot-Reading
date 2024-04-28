@@ -103,13 +103,13 @@ def main():
             if st.button("Submit"):
                 obj_set = FunMode.generate_object_sets(keyword)
                 st.session_state['obj_set'] = obj_set
-                image = FunMode.generate_set_image(obj_set)
-                st.session_state['image'] = image
+                # image = FunMode.generate_set_image(obj_set)
+                # st.session_state['image'] = image
                 st.session_state['stage'] = 'select_set'
                 st.experimental_rerun()
 
         elif st.session_state['stage'] == 'select_set':
-            st.image(st.session_state['image'], caption="Choose one of the following sets:")
+            # st.image(st.session_state['image'], caption="Choose one of the following sets:")
             sets_list = st.session_state['obj_set'].split('\n')
             option = st.radio("Which set of objects would you like to pick?", sets_list)
             if st.button("Choose Set"):
@@ -120,12 +120,10 @@ def main():
         if st.session_state['stage'] == 'final_question':
             user_question = st.text_input("Now, type your question:")
             if st.button("Get Tarot Reading"):
-                symbolism_list = FunMode.set_symbolism(st.session_state['chosen_set']).split(':')
-                keywords = symbolism_list[0]
-                st.write(symbolism_list[1])
-                ReadingWrite("Your keywords are:\n"+ keywords)
-                reading = FunMode.get_tarot_reading_fun(keywords, user_question)
-                ReadingWrite("Your Tarot Reading:\n"+reading)
+                st.session_state['user_question'] = user_question  
+                symbolism = FunMode.set_symbolism(st.session_state['chosen_set'])
+                reading = FunMode.get_tarot_reading_fun(symbolism, st.session_state['user_question'])
+                ReadingWrite(reading)
 
 # def get_tarot_reading_v1(user_question,drawn_cards):
 
@@ -188,7 +186,7 @@ class FunMode:
           model="dall-e-3",
           prompt="Three set of objects, one set per card separated: "+ obj_set +
                 "Resemble the art style of the PLAIN, MUNDANE OLD Waite Rider Tarot card."
-                + "Each card must be same size.",
+                + "Each card must be same size. Major colors: Ivory yellow, dark red, dark blue.",
           size="1792x1024",
           quality="standard",
           n=1,
@@ -202,7 +200,7 @@ class FunMode:
             model="gpt-4",
             messages=[
                 {"role": "system", "content": "Give four keywords about the symbolism associated to a set of objects user chose"                                        + "Make sure to give two positive ones and two negative ones."
-                                            + "Format: keywords_separated_by_commas:concise_explanation"},
+                                            + "Format: keywords separated by commas:concise explanation"},
                 {"role": "user", "content": "The set of object is " + chosen_set}
             ]
         )
@@ -212,12 +210,12 @@ class FunMode:
         response = client.chat.completions.create(
             model="gpt-4",
             messages=[
-                {"role": "system", "content": "You are a tarot reader. Given four keywords and one user question, you draw out 1 card."
+                {"role": "system", "content": "You are a tarot reader. Given keywords, symbolisms and one user question, you draw out 1 card."
                                             + "This card should be correlated to the keywords but loosely."
                                             + "Detailed explain the face of this card. Explain each individuals and their meanings."
                                             + "Then answer user's question, with correspondence to symbolism of the card."
-                                            + "The answer doesn't have to always be positive."
-                                            + "Format: Card Name: [content]\n Individuals and their symbolisms: [content]\n Answer to your question: [content]"},
+                                            + "The answer doesn't have to always be positive. But Always give an answer and Don't ask user for more information."
+                                            + "Format: Keywords: [content]\newline Card Name: [content]\newline Individuals and their symbolisms: [content]\newline Answer to your question: [content]"},
                 {"role": "user", "content": "The keyword is " + keywords + "User question is " + user_question }
             ]
         )
@@ -225,6 +223,7 @@ class FunMode:
 
 
 def ReadingWrite(url):
+    formatted_url = url.replace('\n', '<br>') 
     #  st.markdown(f'< style="background-color:rgba(255, 255, 240, 0.7);font-size:24px;border-radius:4%;">{url}</>', unsafe_allow_html=True)
     st.markdown(f'<div style="background-color:rgba(251, 248, 196,1); padding: 8px;  border-radius:4%;">{url}</div>', unsafe_allow_html=True)
 
