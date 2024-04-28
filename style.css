@@ -10,56 +10,57 @@ body * {
 @import url('https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400..800;1,400..800&family=Jacquard+12+Charted&family=Jacquard+24&display=swap');
 
 body * {
-    /* font-family: "EB Garamond", serif !important; */
-    font-optical-sizing: auto;
-    font-weight: 40;
-    font-style: normal;
+    font-family: "EB Garamond", serif !important;
     color: darkred;
-    background-image: url('https://www.illustratedmonthly.com/cdn/shop/products/manuscript-ornaments-tattoo-art-reference-17844050821282_2000x.jpg?v=1594215803');
-    background-size: contain;
-    background-attachment: fixed; 
-    margin-bottom: 8px;
-    box-sizing: border-box;
 }
 
 
 [data-testid="stAppViewContainer"] {
+    background-image: url('https://www.illustratedmonthly.com/cdn/shop/products/manuscript-ornaments-tattoo-art-reference-17844050821282_2000x.jpg?v=1594215803');
+    background-attachment: fixed; 
+    margin-bottom: 8px;
+    box-sizing: border-box;
     background-size: cover;
     background-repeat: no-repeat;
 }
 
-.stButton > button *{
+.stButton > button {
     border: 2px solid darkred;
     color: darkred;
     padding: 8px 16px;
     text-align: center;
     text-decoration: none;
-    display: inline-block;
+    display: block;
     font-size: 16px;
     margin: 4px 2px;
     transition-duration: 0.4s;
     cursor: pointer;
     border-radius: 10px;
-    background-image: none;
     background-size: cover;
-    background-color: rgba(33, 65, 94, 0.826);
+    background-color: rgba(255, 255, 240, 0.7);
 } 
 
-.stRadio, .stTitle {
+.stTitle{
+    font-size: larger;
     background-color: rgba(255, 255, 240, 0.7); /* Slightly more transparent than body */
-    padding: 8px; /* Optional, for better spacing */
-    border-radius: 4px; /* Optional, for rounded corners */
+    padding: 8px; 
+    border-radius: 4px; 
+}
+
+.stRadio, h1, a, .stTextInput{
+    background-color: rgba(255, 255, 240, 0.7); /* Slightly more transparent than body */
+    padding: 8px; 
+    border-radius: 4px; 
 }
 
 .reportview-container {
-    background: url("")
+    background-image: url('https://www.illustratedmonthly.com/cdn/shop/products/manuscript-ornaments-tattoo-art-reference-17844050821282_2000x.jpg?v=1594215803');
 }
 .sidebar .sidebar-content {
-    background: url("url_goes_here")
+    background-color: darkgray;
 }
 
-a {
-    color: darkred;
-}
+
+
 
 
