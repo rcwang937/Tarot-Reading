@@ -3,16 +3,22 @@ import streamlit as st
 from tarot_deck import TarotDeck
 from openai import OpenAI
 from dotenv import load_dotenv
+<<<<<<< HEAD
 import time
 from PIL import Image
-import base64
-
 
 load_dotenv()
 with open( "style.css" ) as css:
     st.markdown( f'<style>{css.read()}</style>' , unsafe_allow_html= True)
 
 
+=======
+import time
+from PIL import Image
+
+load_dotenv()
+
+>>>>>>> eda2051fea33427fd8dc8e8b5d665edd93e11a30
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
 client = OpenAI(api_key=OPENAI_API_KEY)
