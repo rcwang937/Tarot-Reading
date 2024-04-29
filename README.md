@@ -43,12 +43,16 @@ pipenv run streamlit run app.py
 ## Configuration
 Create a `.env` file in the root directory with the following content:
 ```
-OPENAI_API_KEY_1='YOUR API KEY'
+OPENAI_API_KEY='YOUR API KEY'
 MONGODB_URI='Please ask contributor for more info'
 ```
 Replace `YOUR API KEY` with the actual API key from OpenAI. If you want your results to be saved to the database, please contact the project contributor for the MongoDB URI.
 
 ## Sample Usage Video
+
+To see the app in action, watch the sample usage video below:
+
+[![Watch the video](STATIC/face_image.jpg)](STATIC/PrettyMuchEverything.mp4)
 
 
 ## License
