@@ -92,7 +92,8 @@ def main():
 
                 # Call reading function
                 reading = get_tarot_reading_v1(user_question, drawn_cards)
-                ReadingWrite("Your Tarot Reading:\n"+reading)
+                HeaderWrite("Your Tarot Reading:")
+                ReadingWrite(reading)
 
     elif mode == 'Fun':
         if 'stage' not in st.session_state:
@@ -121,10 +122,15 @@ def main():
             user_question = st.text_input("Now, type your question:")
             if st.button("Get Tarot Reading"):
                 st.session_state['user_question'] = user_question  
+
                 keywords = FunMode.set_symbolism(st.session_state['chosen_set'])
                 ReadingWrite("Keywords: "+keywords)
                 reading = FunMode.get_tarot_reading_fun(keywords, st.session_state['user_question'])
                 ReadingWrite(reading)
+
+
+
+
 
 # def get_tarot_reading_v1(user_question,drawn_cards):
 
@@ -211,12 +217,12 @@ class FunMode:
         response = client.chat.completions.create(
             model="gpt-4",
             messages=[
-                {"role": "system", "content": "You are a tarot reader. Given keywords, you draw out 1 card."
+                {"role": "system", "content": "You are a tarot reader. Given four keywords and one user question, you draw out 1 card."
                                             + "This card should be correlated to the keywords but loosely."
-                                            + "Detailed explain the face of this card. Explain each individuals and their meanings."
+                                            + "Explain the card face, its symbolism and find a storyline for the image if any."
                                             + "Then answer user's question, with correspondence to symbolism of the card."
-                                            + "The answer doesn't have to always be positive. But Always give an answer and Don't ask user for more information."
-                                            + "Format: Card Name: [content]\newline Individuals and their symbolisms: [content]\newline Answer to your question: [content]"},
+                                            + "The answer doesn't have to always be positive."
+                                            + "Format: Your Card: [content]\n\n Symbolism: [content]\n\n Answer: [content]"},
                 {"role": "user", "content": "The keyword is " + keywords + "User question is " + user_question }
             ]
         )
@@ -224,10 +230,12 @@ class FunMode:
 
 
 def ReadingWrite(url):
-    formatted_url = url.replace('\n', '<br>') 
     #  st.markdown(f'< style="background-color:rgba(255, 255, 240, 0.7);font-size:24px;border-radius:4%;">{url}</>', unsafe_allow_html=True)
-    st.markdown(f'<div style="background-color:rgba(251, 248, 196,1); padding: 8px;  border-radius:4%;">{url}</div>', unsafe_allow_html=True)
+    st.markdown(f'<div style="background-color:rgba(251, 248, 196,1); padding: 8px; ">{url}</div>', unsafe_allow_html=True)
 
-     
+def HeaderWrite(url):
+    st.markdown(f'<div style="background-color:rgba(251, 248, 196,1); padding: 8px; font-size:24px; font-weight:bold;">{url}</div>', unsafe_allow_html=True)
+    
+
 if __name__ == "__main__":
     main()
