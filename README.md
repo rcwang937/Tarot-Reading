@@ -52,7 +52,7 @@ Replace `YOUR API KEY` with the actual API key from OpenAI. If you want your res
 
 To see the app in action, watch the sample usage video below:
 
-[![Watch the video](STATIC/face_image.jpg)](STATIC/PrettyMuchEverything.mp4)
+[![Watch the video](STATIC/face_image.jpg)](https://youtu.be/200icy6Epuw)
 
 
 ## License
