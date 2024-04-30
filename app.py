@@ -62,73 +62,77 @@ def main():
     if mode == 'Classic':
         user_question = st.text_input("Enter your question:")
         if user_question:
+            # Initialize the tarot deck only if it hasn't been initialized in the session
+            if 'tarot_deck' not in st.session_state:
+                tarot_deck = TarotDeck()
+                tarot_deck.shuffle_cards()
+                st.session_state['tarot_deck'] = tarot_deck
+            else:
+                tarot_deck = st.session_state['tarot_deck']
 
-            # shuffle card
-            tarot_deck = TarotDeck()
-            tarot_deck.shuffle_cards()
-
-            # display card shuffling options
+            # Display card shuffling options
             col1, col2 = st.columns(2)
             with col1:
                 if st.button("Shuffle Cards"):
-                    st.session_state['shuffling'] = True
+                    tarot_deck.shuffle_cards()  # Reshuffle the deck
 
             with col2:
-                if st.session_state.get('shuffling', False):
-                    if st.button("Stop Shuffling"):
-                        st.session_state['shuffling'] = False
-
-            if st.session_state.get('shuffling', False):
-                st.write("Card shuffling...")
+                if st.button("Stop Shuffling"):
+                    pass  # Implement what should happen when shuffling stops
 
             selected_indices = st.multiselect("The order of your selection matters.\n\nChoose your 3 cards:", options=range(78), format_func=lambda x: "Card " + str(x+1))
 
-            if len(selected_indices) == 3:
-                drawn_cards = [tarot_deck.shuffled_deck[i] for i in selected_indices]
-                images = []
-                captions = []
-                for card in drawn_cards:
-                    image_path = os.path.join(card[2])
-                    img = Image.open(image_path)
-                    if card[1] == 'downward':
-                        img = img.rotate(180)
-                    images.append(img)
-                    captions.append(f"<span style='color:darkred;'>{card[0]}</span>")
+            drawn_cards = []  # Initialize drawn_cards to ensure scope visibility
 
+            if len(selected_indices) == 3:
+                if not 'current_cards' in st.session_state or st.session_state['current_cards'] != selected_indices:
+                    st.session_state['current_cards'] = selected_indices
+                    drawn_cards = [tarot_deck.shuffled_deck[i] for i in selected_indices]
+
+                    # Generate readings once
+                    st.session_state['reading_ft'] = get_tarot_reading_finetune(user_question, drawn_cards)
+                    st.session_state['reading_normal'] = get_tarot_reading_normal(user_question, drawn_cards)
+
+                    # Process images for display
+                    images = []
+                    captions = []
+                    for card in drawn_cards:
+                        image_path = os.path.join(card[2])
+                        img = Image.open(image_path)
+                        if card[1] == 'downward':
+                            img = img.rotate(180)
+                        images.append(img)
+                        captions.append(f"<span style='color:darkred;'>{card[0]}</span>")
+                    st.session_state['card_images'] = images
+                    st.session_state['card_captions'] = captions
+                else:
+                    images = st.session_state['card_images']
+                    captions = st.session_state['card_captions']
+
+                # Display card images and captions
                 cols = st.columns(3)
                 for i, image in enumerate(images):
                     with cols[i]:
                         st.markdown(f"<div style='width: 210px;text-align: center;background-color:rgba(251, 248, 196,1); padding: 8px;  border-radius:4%;'>{captions[i]}</div>", unsafe_allow_html=True)
                         st.image(image, width=210)
 
-
-                # Call reading function
+                # Display readings
                 HeaderWrite("Finetune Model Reading...")
-                reading_ft= get_tarot_reading_finetune(user_question, drawn_cards)
-                ReadingWrite(reading_ft)
+                ReadingWrite(st.session_state['reading_ft'])
 
                 st.write("\n\n")
                 HeaderWrite("Normal Model Reading...")
-                reading_normal= get_tarot_reading_normal(user_question, drawn_cards)
-                ReadingWrite(reading_normal)
+                ReadingWrite(st.session_state['reading_normal'])
 
                 st.write("\n\n")
-
 
                 # Allow user to choose which reading they prefer
                 reading_choice = st.radio("Choose the reading you prefer:", ('Finetuned Model', 'Normal Model'))
                 if st.button("Confirm Choice"):
-                    # Determine the content of the chosen reading
-                    if reading_choice == 'Finetuned Model':
-                        chosen_reading_content = reading_ft
-                    else:
-                        chosen_reading_content = reading_normal
-
-                    # Save user data including their choice and the reading content
-                    card_names = [card[0] for card in drawn_cards]  # Extract card names for storage
+                    chosen_reading_content = st.session_state['reading_ft'] if reading_choice == 'Finetuned Model' else st.session_state['reading_normal']
+                    card_names = [card[0] for card in drawn_cards]
                     save_user_data(db, user_question, card_names, reading_choice, chosen_reading_content)
                     st.success("Your choice and session details have been saved.")
-
 
     # elif mode == 'Fun':
     #     if 'stage' not in st.session_state:
@@ -161,9 +165,9 @@ def main():
     #         # if 'ft_reading' in st.session_state:
     #         #     HeaderWrite("Finetuned model reading...")
     #         #     ReadingWrite(st.session_state['ft_reading'].replace("\\n", "\n"))
-    #         # if 'reading' in st.session_state:                
+    #         # if 'reading' in st.session_state:
     #         #     HeaderWrite("Normal model reading...")
-    #         #     ReadingWrite(st.session_state['reading'])               
+    #         #     ReadingWrite(st.session_state['reading'])
 
     #         if st.button("Get Tarot Reading"):
     #             keywords = FunMode.set_symbolism(st.session_state['chosen_set'])
@@ -180,7 +184,7 @@ def main():
     #             st.session_state['reading'] = reading
     #             HeaderWrite("Normal model reading...")
     #             ReadingWrite(reading)
-                
+
     #             reading_choice = st.radio("Choose the reading you prefer:", ('Finetuned Model', 'Normal Model'))
 
     #             if st.button("Confirm Choice"):
@@ -192,10 +196,10 @@ def main():
     #                 st.session_state['stage'] = 'saving'
 
     #     elif st.session_state['stage'] == 'saving':
- 
+
     #             save_fun_data(st.session_state['Keywords'], st.session_state['User_question'], st.session_state['choice'], st.session_state['chosen_content'])
     #             st.success("Your choice and session details have been saved.")
-                
+
 
 
 
@@ -235,20 +239,20 @@ def main():
                 reading = FunMode.get_tarot_reading_fun(keywords, user_question)
                 ReadingWrite(reading)
                 st.write("\n\n")
-                 
+
                 reading_choice = st.radio("Choose the reading you prefer:", ('Finetuned Model', 'Normal Model'))
-                
+
                 if st.button("Confirm Choice"):
                     if reading_choice == 'Finetuned Model':
                         chosen_reading_content = ft_reading
                     else:
                         chosen_reading_content = reading
- 
+
                     save_fun_data(db, keywords, user_question, reading_choice, chosen_reading_content)
                     st.success("Your choice and session details have been saved.")
 
 
-                
+
 
 def get_tarot_reading_normal(user_question,drawn_cards):
     prompt = tarot_deck.generate_prompt(user_question, drawn_cards)
@@ -374,7 +378,7 @@ def ReadingWrite(url):
 
 def HeaderWrite(url):
     st.markdown(f'<div style="background-color:rgba(251, 248, 196,1); padding: 8px; font-size:24px; font-weight:bold;">{url}</div>', unsafe_allow_html=True)
-    
+
 
 if __name__ == "__main__":
     main()
