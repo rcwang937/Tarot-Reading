@@ -103,34 +103,23 @@ def main():
                         st.markdown(f"<div style='width: 210px;text-align: center;background-color:rgba(251, 248, 196,1); padding: 8px;  border-radius:4%;'>{captions[i]}</div>", unsafe_allow_html=True)
                         st.image(image, width=210)
 
+                # Display readings
+                HeaderWrite("Finetune Model Reading...")
+                ReadingWrite(st.session_state['reading_ft'])
 
-                if 'reading_ft' not in st.session_state or 'reading_normal' not in st.session_state:
-                    # Generate readings only if they are not already stored
-                    HeaderWrite("Finetune Model Reading...")
-                    st.session_state['reading_ft'] = get_tarot_reading_finetune(user_question, drawn_cards)
-                    ReadingWrite(st.session_state['reading_ft'])
+                st.write("\n\n")
+                HeaderWrite("Normal Model Reading...")
+                ReadingWrite(st.session_state['reading_normal'])
 
-                    st.write("\n\n")
-                    HeaderWrite("Normal Model Reading...")
-                    st.session_state['reading_normal'] = get_tarot_reading_normal(user_question, drawn_cards)
-                    ReadingWrite(st.session_state['reading_normal'])
+                st.write("\n\n")
 
-                    st.write("\n\n")
-
-                    # Display the readings through radio buttons without regenerating them
-                    reading_choice = st.radio("Choose the reading you prefer:", ('Finetuned Model', 'Normal Model'))
-                    if st.button("Confirm Choice"):
-                        if reading_choice == 'Finetuned Model':
-                            chosen_reading_content = st.session_state['reading_ft']
-                        else:
-                            chosen_reading_content = st.session_state['reading_normal']
-
-
-                        # Save user data including their choice and the reading content
-                        card_names = [card[0] for card in drawn_cards]  # Extract card names for storage
-                        save_user_data(db, user_question, card_names, reading_choice, chosen_reading_content)
-                        st.success("Your choice and session details have been saved.")
-
+                # Allow user to choose which reading they prefer
+                reading_choice = st.radio("Choose the reading you prefer:", ('Finetuned Model', 'Normal Model'))
+                if st.button("Confirm Choice"):
+                    chosen_reading_content = st.session_state['reading_ft'] if reading_choice == 'Finetuned Model' else st.session_state['reading_normal']
+                    card_names = [card[0] for card in drawn_cards]
+                    save_user_data(db, user_question, card_names, reading_choice, chosen_reading_content)
+                    st.success("Your choice and session details have been saved.")
 
     # elif mode == 'Fun':
     #     if 'stage' not in st.session_state:
@@ -163,9 +152,9 @@ def main():
     #         # if 'ft_reading' in st.session_state:
     #         #     HeaderWrite("Finetuned model reading...")
     #         #     ReadingWrite(st.session_state['ft_reading'].replace("\\n", "\n"))
-    #         # if 'reading' in st.session_state:                
+    #         # if 'reading' in st.session_state:
     #         #     HeaderWrite("Normal model reading...")
-    #         #     ReadingWrite(st.session_state['reading'])               
+    #         #     ReadingWrite(st.session_state['reading'])
 
     #         if st.button("Get Tarot Reading"):
     #             keywords = FunMode.set_symbolism(st.session_state['chosen_set'])
@@ -182,7 +171,7 @@ def main():
     #             st.session_state['reading'] = reading
     #             HeaderWrite("Normal model reading...")
     #             ReadingWrite(reading)
-                
+
     #             reading_choice = st.radio("Choose the reading you prefer:", ('Finetuned Model', 'Normal Model'))
 
     #             if st.button("Confirm Choice"):
@@ -194,10 +183,10 @@ def main():
     #                 st.session_state['stage'] = 'saving'
 
     #     elif st.session_state['stage'] == 'saving':
- 
+
     #             save_fun_data(st.session_state['Keywords'], st.session_state['User_question'], st.session_state['choice'], st.session_state['chosen_content'])
     #             st.success("Your choice and session details have been saved.")
-                
+
 
 
 
