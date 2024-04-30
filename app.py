@@ -47,6 +47,8 @@ def save_fun_data(db, keywords, question, reading_type, reading_content):
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
 client = OpenAI(api_key=OPENAI_API_KEY)
+db = get_db()
+
 
 # Initialize tarot deck
 tarot_deck = TarotDeck()
@@ -54,8 +56,6 @@ tarot_deck = TarotDeck()
 # Streamlit app
 def main():
     st.title("Tarot Card Reading App")
-    db = get_db()
-
 
     mode = st.radio("Choose Mode", ('Classic', 'Fun'))
 
@@ -229,7 +229,7 @@ def main():
                 HeaderWrite("Finetuned model reading...")
                 ft_reading = FunMode.get_tarot_reading_fun_finetuned(keywords, user_question)
                 ReadingWrite(ft_reading.replace("\\n", "\n"))
-                
+
                 st.write("\n\n")
                 HeaderWrite("Normal model reading...")
                 reading = FunMode.get_tarot_reading_fun(keywords, user_question)
