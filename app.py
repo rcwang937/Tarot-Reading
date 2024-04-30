@@ -118,61 +118,6 @@ def main():
 
             drawn_cards = []  # Initialize drawn_cards to ensure scope visibility
 
-
-            # if len(selected_indices) == 3:
-            #     if not 'current_cards' in st.session_state or st.session_state['current_cards'] != selected_indices:
-            #         st.session_state['current_cards'] = selected_indices
-            #         drawn_cards = [tarot_deck.shuffled_deck[i] for i in selected_indices]
-
-
-            #         # Process images for display
-            #         images = []
-            #         captions = []
-            #         for card in drawn_cards:
-            #             image_path = os.path.join(card[2])
-            #             img = Image.open(image_path)
-            #             if card[1] == 'downward':
-            #                 img = img.rotate(180)
-            #             images.append(img)
-            #             captions.append(f"<span style='color:darkred;'>{card[0]}</span>")
-            #         st.session_state['card_images'] = images
-            #         st.session_state['card_captions'] = captions
-
-                    
-            #     else:
-            #         images = st.session_state['card_images']
-            #         captions = st.session_state['card_captions']
-
-
-            #     # Display card images and captions
-            #     cols = st.columns(3)
-            #     for i, image in enumerate(images):
-            #         with cols[i]:
-            #             st.markdown(f"<div style='width: 210px;text-align: center;background-color:rgba(251, 248, 196,1); padding: 8px;  border-radius:4%;'>{captions[i]}</div>", unsafe_allow_html=True)
-            #             st.image(image, width=210)
-
-                
-            #     # Display readings
-            #     HeaderWrite("Finetune Model Reading...")
-            #     ReadingWrite(st.session_state['reading_ft'])
-
-
-            #     st.write("\n\n")
-            #     HeaderWrite("Normal Model Reading...")
-            #     ReadingWrite(st.session_state['reading_normal'])
-
-
-            #     st.write("\n\n")
-
-
-            #     # Allow user to choose which reading they prefer
-            #     reading_choice = st.radio("Choose the reading you prefer:", ('Finetuned Model', 'Normal Model'))
-            #     if st.button("Confirm Choice"):
-            #         chosen_reading_content = st.session_state['reading_ft'] if reading_choice == 'Finetuned Model' else st.session_state['reading_normal']
-                    # card_names = [card[0] for card in drawn_cards]
-                    # save_user_data(db, user_question, card_names, reading_choice, chosen_reading_content)
-                    # st.success("Your choice and session details have been saved.")
-
             if len(selected_indices) == 3 and 'readings_done' not in st.session_state:
                 drawn_cards = [tarot_deck.shuffled_deck[i] for i in selected_indices]
                 images = []
@@ -344,40 +289,57 @@ def main():
                 chosen_set = option.split('. ')[1]
                 st.session_state['chosen_set'] = chosen_set
                 st.session_state['stage'] = 'final_question'
+                st.experimental_rerun()
 
 
         elif st.session_state['stage'] == 'final_question':
             user_question = st.text_input("Now, type your question:")
-            if user_question:
-                keywords = FunMode.set_symbolism(st.session_state['chosen_set'])
+            st.session_state['user_question'] = user_question
+            if st.button("Submit"):
                 HeaderWrite("Keywords:")
-                ReadingWrite(keywords)
-
+                st.session_state['keywords'] = FunMode.set_symbolism(st.session_state['chosen_set'])
+                ReadingWrite(st.session_state['keywords'])
+                
+                st.write("\n\n")
 
                 HeaderWrite("Finetuned model reading...")
-                ft_reading = FunMode.get_tarot_reading_fun_finetuned(keywords, user_question)
-                ReadingWrite(ft_reading.replace("\\n", "\n"))
+                st.session_state['reading_ft'] = FunMode.get_tarot_reading_fun_finetuned(st.session_state['keywords'], user_question)
+                ReadingWrite(st.session_state['reading_ft'].replace("\\n", "\n"))
 
 
                 st.write("\n\n")
                 HeaderWrite("Normal model reading...")
-                reading = FunMode.get_tarot_reading_fun(keywords, user_question)
-                ReadingWrite(reading)
+                st.session_state['reading_normal'] = FunMode.get_tarot_reading_fun(st.session_state['keywords'], user_question)
+                ReadingWrite(st.session_state['reading_normal'])
                 st.write("\n\n")
 
 
-                reading_choice = st.radio("Choose the reading you prefer:", ('Finetuned Model', 'Normal Model'))
+                st.session_state['stage'] = 'reading_done'
+                st.experimental_rerun()
 
+        elif st.session_state['stage']=='reading_done':
+            HeaderWrite("Keywords: ")
+            ReadingWrite(st.session_state['keywords'])
+            st.write("\n\n")
+            HeaderWrite("Finetune Model Reading...")
+            ReadingWrite(st.session_state['reading_ft'].replace("\\n", "\n"))
+            st.write("\n\n")
+            HeaderWrite("Normal Model Reading...")
+            ReadingWrite(st.session_state['reading_normal'])
+            st.write("\n\n")
 
-                if st.button("Confirm Choice"):
-                    if reading_choice == 'Finetuned Model':
-                        chosen_reading_content = ft_reading
-                    else:
-                        chosen_reading_content = reading
+            # Display the readings through radio buttons without regenerating them
+            # reading_choice = st.radio("Choose the reading you prefer:", ('Finetuned Model', 'Normal Model'))
+            reading_choice = st.radio("Choose the reading you prefer:", ('Finetuned Model', 'Normal Model'), key='radio_selected')
 
+            if st.button("Confirm Choice"):
+                if reading_choice == 'Finetuned Model':
+                    chosen_reading_content = st.session_state['reading_ft']
+                else:
+                    chosen_reading_content = st.session_state['reading_normal']
 
-                    save_fun_data(db, keywords, user_question, reading_choice, chosen_reading_content)
-                    st.success("Your choice and session details have been saved.")
+                save_fun_data(db,st.session_state['keywords'],st.session_state['user_question'],reading_choice,chosen_reading_content)
+                st.success("Your choice and session details have been saved.")
 
 
 
