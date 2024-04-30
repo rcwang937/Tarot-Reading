@@ -23,8 +23,7 @@ def get_db():
 
 
 # Function to save user data to MongoDB
-def save_user_data(question, cards, reading_type, reading_content):
-    db = get_db()
+def save_user_data(db, question, cards, reading_type, reading_content):
     user_data = {
         "question": question,
         "cards": cards,
@@ -34,8 +33,7 @@ def save_user_data(question, cards, reading_type, reading_content):
     }
     db.user_readings.insert_one(user_data)
 
-def save_fun_data(keywords, question, reading_type, reading_content):
-    db = get_db()
+def save_fun_data(db, keywords, question, reading_type, reading_content):
     user_data = {
         "keywords": keywords,
         "question": question,
@@ -56,7 +54,8 @@ tarot_deck = TarotDeck()
 # Streamlit app
 def main():
     st.title("Tarot Card Reading App")
-    i=1
+    db = get_db()
+
 
     mode = st.radio("Choose Mode", ('Classic', 'Fun'))
 
@@ -104,13 +103,17 @@ def main():
 
 
                 # Call reading function
-                reading_ft= get_tarot_reading_finetune(user_question, drawn_cards)
-                reading_normal= get_tarot_reading_normal(user_question, drawn_cards)
-
                 HeaderWrite("Finetune Model Reading...")
+                reading_ft= get_tarot_reading_finetune(user_question, drawn_cards)
                 ReadingWrite(reading_ft)
+
+                st.write("\n\n")
                 HeaderWrite("Normal Model Reading...")
+                reading_normal= get_tarot_reading_normal(user_question, drawn_cards)
                 ReadingWrite(reading_normal)
+
+                st.write("\n\n")
+
 
                 # Allow user to choose which reading they prefer
                 reading_choice = st.radio("Choose the reading you prefer:", ('Finetuned Model', 'Normal Model'))
@@ -123,7 +126,7 @@ def main():
 
                     # Save user data including their choice and the reading content
                     card_names = [card[0] for card in drawn_cards]  # Extract card names for storage
-                    save_user_data(user_question, card_names, reading_choice, chosen_reading_content)
+                    save_user_data(db, user_question, card_names, reading_choice, chosen_reading_content)
                     st.success("Your choice and session details have been saved.")
 
 
@@ -223,12 +226,15 @@ def main():
                 HeaderWrite("Keywords:")
                 ReadingWrite(keywords)
 
-                ft_reading = FunMode.get_tarot_reading_fun_finetuned(keywords, user_question)
                 HeaderWrite("Finetuned model reading...")
+                ft_reading = FunMode.get_tarot_reading_fun_finetuned(keywords, user_question)
                 ReadingWrite(ft_reading.replace("\\n", "\n"))
-                reading = FunMode.get_tarot_reading_fun(keywords, user_question)
+                
+                st.write("\n\n")
                 HeaderWrite("Normal model reading...")
+                reading = FunMode.get_tarot_reading_fun(keywords, user_question)
                 ReadingWrite(reading)
+                st.write("\n\n")
                  
                 reading_choice = st.radio("Choose the reading you prefer:", ('Finetuned Model', 'Normal Model'))
                 
@@ -238,7 +244,7 @@ def main():
                     else:
                         chosen_reading_content = reading
  
-                    save_fun_data(keywords, user_question, reading_choice, chosen_reading_content)
+                    save_fun_data(db, keywords, user_question, reading_choice, chosen_reading_content)
                     st.success("Your choice and session details have been saved.")
 
 
