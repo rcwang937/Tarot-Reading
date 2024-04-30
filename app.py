@@ -57,9 +57,11 @@ tarot_deck = TarotDeck()
 def main():
     st.title("Tarot Card Reading App")
 
-    mode = st.radio("Choose Mode", ('Classic', 'Fun'))
+    mode = st.radio("Choose Mode", ('Classic', 'Fun'))    
+
 
     if mode == 'Classic':
+
         user_question = st.text_input("Enter your question:")
         if user_question:
 
@@ -102,32 +104,32 @@ def main():
                         st.image(image, width=210)
 
 
-                # Call reading function
-                HeaderWrite("Finetune Model Reading...")
-                reading_ft= get_tarot_reading_finetune(user_question, drawn_cards)
-                ReadingWrite(reading_ft)
+                if 'reading_ft' not in st.session_state or 'reading_normal' not in st.session_state:
+                    # Generate readings only if they are not already stored
+                    HeaderWrite("Finetune Model Reading...")
+                    st.session_state['reading_ft'] = get_tarot_reading_finetune(user_question, drawn_cards)
+                    ReadingWrite(st.session_state['reading_ft'])
 
-                st.write("\n\n")
-                HeaderWrite("Normal Model Reading...")
-                reading_normal= get_tarot_reading_normal(user_question, drawn_cards)
-                ReadingWrite(reading_normal)
+                    st.write("\n\n")
+                    HeaderWrite("Normal Model Reading...")
+                    st.session_state['reading_normal'] = get_tarot_reading_normal(user_question, drawn_cards)
+                    ReadingWrite(st.session_state['reading_normal'])
 
-                st.write("\n\n")
+                    st.write("\n\n")
+
+                    # Display the readings through radio buttons without regenerating them
+                    reading_choice = st.radio("Choose the reading you prefer:", ('Finetuned Model', 'Normal Model'))
+                    if st.button("Confirm Choice"):
+                        if reading_choice == 'Finetuned Model':
+                            chosen_reading_content = st.session_state['reading_ft']
+                        else:
+                            chosen_reading_content = st.session_state['reading_normal']
 
 
-                # Allow user to choose which reading they prefer
-                reading_choice = st.radio("Choose the reading you prefer:", ('Finetuned Model', 'Normal Model'))
-                if st.button("Confirm Choice"):
-                    # Determine the content of the chosen reading
-                    if reading_choice == 'Finetuned Model':
-                        chosen_reading_content = reading_ft
-                    else:
-                        chosen_reading_content = reading_normal
-
-                    # Save user data including their choice and the reading content
-                    card_names = [card[0] for card in drawn_cards]  # Extract card names for storage
-                    save_user_data(db, user_question, card_names, reading_choice, chosen_reading_content)
-                    st.success("Your choice and session details have been saved.")
+                        # Save user data including their choice and the reading content
+                        card_names = [card[0] for card in drawn_cards]  # Extract card names for storage
+                        save_user_data(db, user_question, card_names, reading_choice, chosen_reading_content)
+                        st.success("Your choice and session details have been saved.")
 
 
     # elif mode == 'Fun':
